@@ -61,9 +61,34 @@ public interface Script<T> {
     void addExtraScript(String script);
 
     /**
-     * Evaluates and executes this script.
+     * Compiles the script.
      *
-     * @throws ScriptFunctionException If there's an error during script evaluation
+     * @param script the script to compile
+     * @return compiled script object
+     * @throws ScriptException if there's an error during script compiling
      */
-    T eval(String script) throws ScriptException;
+    CompiledScript<T> compile(String script) throws ScriptException;
+
+    /**
+     * One-time evaluation of a script without worrying about closing the context.
+     *
+     * @param script the script to evaluate
+     * @return the evaluation result
+     * @throws ScriptException if there's an error during script evaluation
+     */
+    T evalOneShot(String script) throws ScriptException;
+
+    /**
+     * Evaluates and executes the script.
+     *
+     * @param script the script to evaluate
+     * @return the evaluation result
+     * @throws ScriptFunctionException if there's an error during script evaluation
+     * @deprecated For a one-time evaluation of a script, use the Script#evalOneShot method;
+     *             for pre-compiling a script, use Script#compile.
+     */
+    @Deprecated
+    default T eval(String script) throws ScriptException {
+        return this.evalOneShot(script);
+    }
 }

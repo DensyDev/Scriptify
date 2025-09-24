@@ -1,6 +1,7 @@
 package com.instancify.scriptify.js.graalvm.script;
 
 import com.instancify.scriptify.api.exception.ScriptException;
+import com.instancify.scriptify.api.script.CompiledScript;
 import com.instancify.scriptify.api.script.Script;
 import com.instancify.scriptify.api.script.ScriptObject;
 import com.instancify.scriptify.api.script.constant.ScriptConstant;
@@ -57,7 +58,7 @@ public class JsScript implements Script<Value> {
     }
 
     @Override
-    public Value eval(String script) throws ScriptException {
+    public CompiledScript<Value> compile(String script) throws ScriptException {
         Context.Builder builder = Context.newBuilder("js")
                 .allowHostAccess(HostAccess.newBuilder(HostAccess.ALL)
                         // Mapping for the ScriptObject class required
@@ -98,11 +99,16 @@ public class JsScript implements Script<Value> {
         fullScript.append(script);
 
         try {
-            return context.eval("js", fullScript.toString());
+            return new JsCompiledScript(context, context.eval("js", fullScript.toString()));
         } catch (Exception e) {
             throw new ScriptException(e);
-        } finally {
-            context.close();
+        }
+    }
+
+    @Override
+    public Value evalOneShot(String script) throws ScriptException {
+        try (CompiledScript<Value> compiled = compile(script)) {
+            return compiled.get();
         }
     }
 }
