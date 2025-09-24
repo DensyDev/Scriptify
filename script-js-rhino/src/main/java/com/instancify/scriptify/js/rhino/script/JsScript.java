@@ -1,6 +1,7 @@
 package com.instancify.scriptify.js.rhino.script;
 
 import com.instancify.scriptify.api.exception.ScriptException;
+import com.instancify.scriptify.api.script.CompiledScript;
 import com.instancify.scriptify.api.script.Script;
 import com.instancify.scriptify.api.script.constant.ScriptConstant;
 import com.instancify.scriptify.api.script.constant.ScriptConstantManager;
@@ -19,15 +20,10 @@ import java.util.Objects;
 
 public class JsScript implements Script<Object> {
 
-    private final Context context = Context.enter();
     private final ScriptSecurityManager securityManager = new StandardSecurityManager();
     private ScriptFunctionManager functionManager = new StandardFunctionManager();
     private ScriptConstantManager constantManager = new StandardConstantManager();
     private final List<String> extraScript = new ArrayList<>();
-
-    public JsScript() {
-        context.setWrapFactory(new JsWrapFactory());
-    }
 
     @Override
     public ScriptSecurityManager getSecurityManager() {
@@ -60,36 +56,45 @@ public class JsScript implements Script<Object> {
     }
 
     @Override
-    public Object eval(String script) throws ScriptException {
-        ScriptableObject scope = context.initStandardObjects();
-
-        // If security mode is enabled, search all exclusions
-        // and add the classes that were excluded to JsSecurityClassAccessor
-        if (securityManager.getSecurityMode()) {
-            context.setClassShutter(new JsSecurityClassAccessor(securityManager.getExcludes()));
-        }
-
-        for (ScriptFunctionDefinition definition : functionManager.getFunctions().values()) {
-            scope.put(definition.getFunction().getName(), scope, new JsFunction(this, definition));
-        }
-
-        for (ScriptConstant constant : constantManager.getConstants().values()) {
-            ScriptableObject.putConstProperty(scope, constant.getName(), constant.getValue());
-        }
-
-        // Building full script including extra script code
-        StringBuilder fullScript = new StringBuilder();
-        for (String extra : extraScript) {
-            fullScript.append(extra).append("\n");
-        }
-        fullScript.append(script);
-
+    public CompiledScript<Object> compile(String script) throws ScriptException {
         try {
-            return context.evaluateString(scope, fullScript.toString(), null, 1, null);
+            Context context = Context.enter();
+            context.setWrapFactory(new JsWrapFactory());
+
+            ScriptableObject scope = context.initStandardObjects();
+
+            // If security mode is enabled, search all exclusions
+            // and add the classes that were excluded to JsSecurityClassAccessor
+            if (securityManager.getSecurityMode()) {
+                context.setClassShutter(new JsSecurityClassAccessor(securityManager.getExcludes()));
+            }
+
+            for (ScriptFunctionDefinition definition : functionManager.getFunctions().values()) {
+                scope.put(definition.getFunction().getName(), scope, new JsFunction(this, definition));
+            }
+
+            for (ScriptConstant constant : constantManager.getConstants().values()) {
+                ScriptableObject.putConstProperty(scope, constant.getName(), constant.getValue());
+            }
+
+            // Building full script including extra script code
+            StringBuilder fullScript = new StringBuilder();
+            for (String extra : extraScript) {
+                fullScript.append(extra).append("\n");
+            }
+            fullScript.append(script);
+
+            var compiled = context.compileString(fullScript.toString(), "script", 1, null);
+            return new JsCompiledScript(context, scope, compiled);
         } catch (Exception e) {
             throw new ScriptException(e);
-        } finally {
-            context.close();
+        }
+    }
+
+    @Override
+    public Object evalOneShot(String script) throws ScriptException {
+        try (CompiledScript<Object> compiled = compile(script)) {
+            return compiled.get();
         }
     }
 }
