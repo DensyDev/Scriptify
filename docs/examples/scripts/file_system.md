@@ -3,7 +3,7 @@ Example of working with the file system using scripts
 
 ```js
 // Downloading a file from url
-const url = "https://repo.instancify.app/snapshots/com/instancify/scriptify/script-js/1.0.3-SNAPSHOT/maven-metadata.xml";
+const url = "https://repo.densy.org/snapshots/org/densy/scriptify/script-js/1.0.3-SNAPSHOT/maven-metadata.xml";
 const fileName = "maven-metadata.xml";
 
 if (!existsFile(fileName)) {

@@ -1,4 +1,4 @@
-rootProject.name = "instancify-Scriptify"
+rootProject.name = "Scriptify"
 include("api")
 include("core")
 include("common")

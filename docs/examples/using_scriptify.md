@@ -4,20 +4,20 @@ ___
 
 ### Using JS with GraalVM
 ```kotlin
-implementation "com.instancify.scriptify:script-js-graalvm:1.3.0-SNAPSHOT"
+implementation "org.densy.scriptify:script-js-graalvm:1.3.0-SNAPSHOT"
 ```
 ### Using JS with Rhino
 ```kotlin
-implementation "com.instancify.scriptify:script-js-rhino:1.3.0-SNAPSHOT"
+implementation "org.densy.scriptify:script-js-rhino:1.3.0-SNAPSHOT"
 ```
 ___
 
 Running the script (GraalVM):
 ```java
-import com.instancify.scriptify.js.graalvm.script.JsScript;
-import com.instancify.scriptify.core.script.constant.StandardConstantManager;
-import com.instancify.scriptify.core.script.function.StandardFunctionManager;
-import com.instancify.scriptify.api.exception.ScriptException;
+import org.densy.scriptify.js.graalvm.script.JsScript;
+import org.densy.scriptify.core.script.StandardConstantManager;
+import org.densy.scriptify.core.script.StandardFunctionManager;
+import org.densy.scriptify.api.ScriptException;
 
 JsScript script = new JsScript();
 script.setFunctionManager(new StandardFunctionManager());
