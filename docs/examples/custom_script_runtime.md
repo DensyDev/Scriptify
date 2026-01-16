@@ -8,11 +8,11 @@ ___
 
 Let's create our script:
 ```java
-import com.instancify.scriptify.api.script.Script;
-import com.instancify.scriptify.api.script.constant.ScriptConstant;
-import com.instancify.scriptify.api.script.constant.ScriptConstantManager;
-import com.instancify.scriptify.api.script.function.ScriptFunction;
-import com.instancify.scriptify.api.script.function.ScriptFunctionManager;
+import script.org.densy.scriptify.api.Script;
+import constant.script.org.densy.scriptify.api.ScriptConstant;
+import constant.script.org.densy.scriptify.api.ScriptConstantManager;
+import function.script.org.densy.scriptify.api.ScriptFunction;
+import function.script.org.densy.scriptify.api.ScriptFunctionManager;
 import org.graalvm.polyglot.*;
 
 public class JsScript implements Script {
@@ -80,9 +80,9 @@ public class JsScript implements Script {
 
 Now let's create a function:
 ```java
-import com.instancify.scriptify.api.exception.ScriptFunctionException;
-import com.instancify.scriptify.api.script.Script;
-import com.instancify.scriptify.api.script.function.ScriptFunction;
+import exception.org.densy.scriptify.api.ScriptFunctionException;
+import script.org.densy.scriptify.api.Script;
+import function.script.org.densy.scriptify.api.ScriptFunction;
 import org.graalvm.polyglot.proxy.ProxyExecutable;
 import org.graalvm.polyglot.Value;
 
