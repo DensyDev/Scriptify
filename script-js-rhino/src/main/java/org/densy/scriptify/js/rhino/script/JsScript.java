@@ -7,6 +7,7 @@ import org.densy.scriptify.api.script.constant.ScriptConstant;
 import org.densy.scriptify.api.script.constant.ScriptConstantManager;
 import org.densy.scriptify.api.script.function.ScriptFunctionManager;
 import org.densy.scriptify.api.script.function.definition.ScriptFunctionDefinition;
+import org.densy.scriptify.api.script.module.ScriptModuleManager;
 import org.densy.scriptify.api.script.security.ScriptSecurityManager;
 import org.densy.scriptify.core.script.constant.StandardConstantManager;
 import org.densy.scriptify.core.script.function.StandardFunctionManager;
@@ -28,6 +29,12 @@ public class JsScript implements Script<Object> {
     @Override
     public ScriptSecurityManager getSecurityManager() {
         return securityManager;
+    }
+
+    @Override
+    public ScriptModuleManager getModuleManager() {
+        // TODO: implement
+        return null;
     }
 
     @Override

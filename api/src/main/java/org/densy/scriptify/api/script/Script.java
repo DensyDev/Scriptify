@@ -4,6 +4,7 @@ import org.densy.scriptify.api.exception.ScriptException;
 import org.densy.scriptify.api.exception.ScriptFunctionException;
 import org.densy.scriptify.api.script.constant.ScriptConstantManager;
 import org.densy.scriptify.api.script.function.ScriptFunctionManager;
+import org.densy.scriptify.api.script.module.ScriptModuleManager;
 import org.densy.scriptify.api.script.security.ScriptSecurityManager;
 
 /**
@@ -20,6 +21,8 @@ public interface Script<T> {
      * @see ScriptSecurityManager
      */
     ScriptSecurityManager getSecurityManager();
+
+    ScriptModuleManager getModuleManager();
 
     /**
      * Retrieves the function manager associated with this script.
