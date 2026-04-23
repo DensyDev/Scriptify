@@ -1,7 +1,9 @@
 package org.densy.scriptify.core.script.module;
 
-import org.densy.scriptify.api.script.module.export.ScriptExport;
+import org.densy.scriptify.api.exception.ScriptModuleCopyException;
 import org.densy.scriptify.api.script.module.ScriptModule;
+import org.densy.scriptify.api.script.module.export.ScriptExport;
+import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -20,7 +22,26 @@ public abstract class AbstractScriptModule implements ScriptModule {
     }
 
     @Override
-    public Collection<ScriptExport> getExports() {
+    public void copy(ScriptModule module) {
+        // We need to verify that the module from which we want to copy exports
+        // does not contain any exports with the same name as in the current
+        // module but with a different hash.
+        boolean conflicts = module.getExports().stream().anyMatch(e ->
+                exports.values().stream().anyMatch(existing ->
+                        existing.getName().equals(e.getName()) &&
+                                existing.hashCode() != e.hashCode()
+                )
+        );
+
+        if (conflicts) {
+            throw new ScriptModuleCopyException("The copy operation cannot be performed: both modules contain different exports with the same name");
+        }
+
+        module.getExports().forEach(this::export);
+    }
+
+    @Override
+    public @UnmodifiableView Collection<ScriptExport> getExports() {
         return Collections.unmodifiableCollection(exports.values());
     }
 }

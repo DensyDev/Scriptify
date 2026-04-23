@@ -32,8 +32,8 @@ public class GraalModuleManager implements ScriptModuleManager {
     }
 
     @Override
-    public ScriptModule getModule(String name) {
-        return modules.get(name);
+    public Map<String, ScriptModule> getModules() {
+        return modules;
     }
 
     @Override

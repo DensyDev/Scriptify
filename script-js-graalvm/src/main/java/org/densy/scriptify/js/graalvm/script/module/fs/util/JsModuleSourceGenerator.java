@@ -1,4 +1,4 @@
-package org.densy.scriptify.js.graalvm.script.module;
+package org.densy.scriptify.js.graalvm.script.module.fs.util;
 
 import org.densy.scriptify.api.script.module.ScriptModule;
 import org.densy.scriptify.api.script.module.export.ScriptExport;
@@ -8,13 +8,13 @@ import org.graalvm.polyglot.Context;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class GraalModuleSourceGenerator {
+public final class JsModuleSourceGenerator {
 
     public static final String BRIDGE_PREFIX = "__scriptify_bridge_";
 
     public static String generateModuleSource(Context context, ScriptModule module) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("// @generated module: ").append(module.getName()).append("\n");
+        StringBuilder builder = new StringBuilder();
+        builder.append("// @generated module: ").append(module.getName()).append("\n");
 
         List<String> names = new ArrayList<>();
 
@@ -25,19 +25,19 @@ public final class GraalModuleSourceGenerator {
             if (export instanceof ScriptValueExport valueExport) {
                 if (valueExport.isClass()) {
                     Class<?> valueClass = (Class<?>) valueExport.getValue();
-                    sb.append("const ").append(name)
+                    builder.append("const ").append(name)
                             .append(" = Java.type('").append(valueClass.getName()).append("');\n");
                 } else {
                     String bridge = BRIDGE_PREFIX + name;
                     context.getBindings("js").putMember(bridge, context.asValue(valueExport.getValue()));
-                    sb.append("const ").append(name)
+                    builder.append("const ").append(name)
                             .append(" = globalThis.").append(bridge).append(";\n");
                 }
             }
         }
 
-        sb.append("\nexport { ").append(String.join(", ", names)).append(" };\n");
-        return sb.toString();
+        builder.append("\nexport { ").append(String.join(", ", names)).append(" };\n");
+        return builder.toString();
     }
 
     public static String encodeModuleName(String name) {

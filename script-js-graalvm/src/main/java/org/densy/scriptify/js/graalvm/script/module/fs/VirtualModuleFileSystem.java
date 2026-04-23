@@ -2,8 +2,8 @@ package org.densy.scriptify.js.graalvm.script.module.fs;
 
 import org.densy.scriptify.api.script.module.ScriptModule;
 import org.densy.scriptify.api.script.module.ScriptModuleManager;
-import org.densy.scriptify.js.graalvm.script.module.GraalModuleSourceGenerator;
 import org.densy.scriptify.js.graalvm.script.module.fs.util.ByteArrayChannel;
+import org.densy.scriptify.js.graalvm.script.module.fs.util.JsModuleSourceGenerator;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.io.FileSystem;
 
@@ -81,7 +81,7 @@ public class VirtualModuleFileSystem implements FileSystem {
             if (module == null) {
                 throw new IOException("Scriptify module not found: " + moduleName);
             }
-            byte[] source = GraalModuleSourceGenerator
+            byte[] source = JsModuleSourceGenerator
                     .generateModuleSource(contextSupplier.get(), module)
                     .getBytes(StandardCharsets.UTF_8);
             return new ByteArrayChannel(source);
@@ -120,7 +120,7 @@ public class VirtualModuleFileSystem implements FileSystem {
         return modulePathCache.computeIfAbsent(moduleName, name -> Paths.get(
                 System.getProperty("java.io.tmpdir"),
                 "scriptify",
-                GraalModuleSourceGenerator.encodeModuleName(name) + ".mjs"
+                JsModuleSourceGenerator.encodeModuleName(name) + ".mjs"
         ));
     }
 
