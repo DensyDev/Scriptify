@@ -1,5 +1,7 @@
 package org.densy.scriptify.api.script.module;
 
+import org.densy.scriptify.api.script.module.export.resolver.ScriptModuleExportResolver;
+import org.densy.scriptify.api.script.module.export.resolver.ScriptModuleExportResolverFactory;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -10,6 +12,10 @@ import java.util.Map;
  * The global module is always present and created automatically.
  */
 public interface ScriptModuleManager {
+
+    ScriptModuleExportResolverFactory getModuleExportResolver();
+
+    void setModuleExportResolver(ScriptModuleExportResolverFactory factory);
 
     /**
      * Exports added here are available globally without import

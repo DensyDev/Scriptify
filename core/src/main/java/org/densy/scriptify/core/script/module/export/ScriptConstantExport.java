@@ -17,5 +17,4 @@ public final class ScriptConstantExport implements ScriptExport {
     public String getName() {
         return constant.getName();
     }
-
 }

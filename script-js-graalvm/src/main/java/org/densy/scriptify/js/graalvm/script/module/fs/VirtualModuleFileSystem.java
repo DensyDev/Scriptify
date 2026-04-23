@@ -2,6 +2,7 @@ package org.densy.scriptify.js.graalvm.script.module.fs;
 
 import org.densy.scriptify.api.script.module.ScriptModule;
 import org.densy.scriptify.api.script.module.ScriptModuleManager;
+import org.densy.scriptify.api.script.module.export.resolver.ScriptModuleExportResolver;
 import org.densy.scriptify.js.graalvm.script.module.fs.util.ByteArrayChannel;
 import org.densy.scriptify.js.graalvm.script.module.fs.util.JsModuleSourceGenerator;
 import org.graalvm.polyglot.Context;
@@ -26,12 +27,18 @@ public class VirtualModuleFileSystem implements FileSystem {
     private final FileSystem real = FileSystem.newDefaultFileSystem();
     private final ScriptModuleManager moduleManager;
     private final Supplier<Context> contextSupplier;
+    private final Supplier<ScriptModuleExportResolver> resolverSupplier;
 
     private final Map<String, Path> modulePathCache = new HashMap<>();
 
-    public VirtualModuleFileSystem(ScriptModuleManager moduleManager, Supplier<Context> contextSupplier) {
+    public VirtualModuleFileSystem(
+            ScriptModuleManager moduleManager,
+            Supplier<Context> contextSupplier,
+            Supplier<ScriptModuleExportResolver> resolverSupplier
+    ) {
         this.moduleManager = moduleManager;
         this.contextSupplier = contextSupplier;
+        this.resolverSupplier = resolverSupplier;
     }
 
     @Override
@@ -82,7 +89,7 @@ public class VirtualModuleFileSystem implements FileSystem {
                 throw new IOException("Scriptify module not found: " + moduleName);
             }
             byte[] source = JsModuleSourceGenerator
-                    .generateModuleSource(contextSupplier.get(), module)
+                    .generateModuleSource(contextSupplier.get(), module, resolverSupplier.get())
                     .getBytes(StandardCharsets.UTF_8);
             return new ByteArrayChannel(source);
         }

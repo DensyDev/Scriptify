@@ -1,21 +1,20 @@
 package org.densy.scriptify.core.script.module.export;
 
 import lombok.Getter;
-import org.densy.scriptify.api.script.function.definition.ScriptFunctionDefinition;
+import org.densy.scriptify.api.script.function.ScriptFunction;
 import org.densy.scriptify.api.script.module.export.ScriptExport;
 
 @Getter
 public final class ScriptFunctionExport implements ScriptExport {
 
-    private final ScriptFunctionDefinition definition;
+    private final ScriptFunction function;
 
-    public ScriptFunctionExport(ScriptFunctionDefinition definition) {
-        this.definition = definition;
+    public ScriptFunctionExport(ScriptFunction function) {
+        this.function = function;
     }
 
     @Override
     public String getName() {
-        return definition.getFunction().getName();
+        return function.getName();
     }
-
 }

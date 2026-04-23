@@ -1,6 +1,7 @@
 package org.densy.scriptify.js.graalvm.script;
 
 import org.densy.scriptify.api.exception.ScriptException;
+import org.densy.scriptify.api.exception.ScriptModuleWrongContextException;
 import org.densy.scriptify.api.script.CompiledScript;
 import org.densy.scriptify.api.script.Script;
 import org.densy.scriptify.api.script.ScriptObject;
@@ -9,11 +10,12 @@ import org.densy.scriptify.api.script.constant.ScriptConstantManager;
 import org.densy.scriptify.api.script.function.ScriptFunctionManager;
 import org.densy.scriptify.api.script.function.definition.ScriptFunctionDefinition;
 import org.densy.scriptify.api.script.module.ScriptModuleManager;
+import org.densy.scriptify.api.script.module.export.resolver.ScriptModuleExportResolver;
 import org.densy.scriptify.api.script.security.ScriptSecurityManager;
 import org.densy.scriptify.core.script.constant.StandardConstantManager;
 import org.densy.scriptify.core.script.function.StandardFunctionManager;
 import org.densy.scriptify.core.script.module.export.ScriptConstantExport;
-import org.densy.scriptify.core.script.module.export.ScriptFunctionExport;
+import org.densy.scriptify.core.script.module.export.ScriptFunctionDefinitionExport;
 import org.densy.scriptify.core.script.security.StandardSecurityManager;
 import org.densy.scriptify.js.graalvm.script.module.GraalModuleManager;
 import org.densy.scriptify.js.graalvm.script.module.fs.VirtualModuleFileSystem;
@@ -27,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 public class JsScript implements Script<Value> {
 
@@ -77,6 +80,14 @@ public class JsScript implements Script<Value> {
         // we can access it in the file system
         AtomicReference<Context> contextRef = new AtomicReference<>();
 
+        Supplier<ScriptModuleExportResolver> resolverSupplier = () -> {
+            try {
+                return moduleManager.getModuleExportResolver().create(contextRef.get());
+            } catch (ScriptModuleWrongContextException e) {
+                throw new RuntimeException(e);
+            }
+        };
+
         Context.Builder builder = Context.newBuilder("js")
                 .allowHostAccess(HostAccess.newBuilder(HostAccess.ALL)
                         // Mapping for the ScriptObject class required
@@ -89,7 +100,7 @@ public class JsScript implements Script<Value> {
                         )
                         .build())
                 .allowIO(IOAccess.newBuilder()
-                        .fileSystem(new VirtualModuleFileSystem(moduleManager, contextRef::get))
+                        .fileSystem(new VirtualModuleFileSystem(moduleManager, contextRef::get, resolverSupplier))
                         .build());
 
         // If security mode is enabled, search all exclusions
@@ -104,7 +115,7 @@ public class JsScript implements Script<Value> {
         contextRef.set(context);
 
         for (ScriptFunctionDefinition definition : functionManager.getFunctions().values()) {
-            moduleManager.getGlobalModule().export(new ScriptFunctionExport(definition));
+            moduleManager.getGlobalModule().export(new ScriptFunctionDefinitionExport(definition));
         }
         for (ScriptConstant constant : constantManager.getConstants().values()) {
             moduleManager.getGlobalModule().export(new ScriptConstantExport(constant));
