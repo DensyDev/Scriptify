@@ -58,37 +58,24 @@ public class SecurityPathAccessorImpl implements SecurityPathAccessor {
 
     /**
      * Returns a path that is safe to access according to security rules.
-     * If the path is accessible via exclusions, returns the normalized path.
-     * If the path is not accessible, creates a safe path within basePath by cleaning the path from invalid characters.
      *
      * @param path The path string to be checked and possibly modified
-     * @return A Path object representing the accessible path or a path within base directory
+     * @return a Path object representing the accessible path or a path within base directory
+     * @throws SecurityException if path cannot be accessed
      */
     @Override
     public Path getAccessiblePath(String path) {
         if (this.isAccessible(path)) {
-            // Path is in exclusions - return it normalized
-            return Paths.get(path).normalize().toAbsolutePath();
+            return basePath.resolve(path).normalize().toAbsolutePath();
         }
-
-        // Path is not accessible - create safe path within basePath
-        // We need to manually combine paths because resolve() ignores basePath for absolute paths
-        Path safePath = Paths.get(basePath.toString(), path.replace(":", "")).normalize();
-
-        // CRITICAL: Ensure the result stays within basePath boundaries
-        if (!safePath.startsWith(basePath)) {
-            // If path tries to escape basePath (e.g., "../"), return basePath itself
-            return basePath;
-        }
-
-        return safePath;
+        throw new SecurityException("Access denied by security policy: " + path);
     }
 
     /**
      * Checks if the given path is accessible based on the current security settings.
      *
-     * @param path The path to check for access permission
-     * @return true if the path is accessible, false otherwise
+     * @param path the path to check for access permission
+     * @return true if the path is accessible, otherwise false
      */
     @Override
     public boolean isAccessible(String path) {
@@ -96,35 +83,18 @@ public class SecurityPathAccessorImpl implements SecurityPathAccessor {
             return true;
         }
 
-        // Normalize the path to resolve .. and . components to prevent path traversal
         Path normalizedPath;
         try {
-            normalizedPath = Paths.get(path).normalize().toAbsolutePath();
+            normalizedPath = basePath.resolve(path).normalize().toAbsolutePath();
         } catch (Exception e) {
             return false;
         }
 
-        // Check both original and normalized path against exclusions for compatibility
-        String normalizedPathString = normalizedPath.toString();
+        String normalizedStr = normalizedPath.toString().replace('\\', '/');
 
-        // Search all exclusions and check that the path is excluded
         for (SecurityExclude exclude : securityManager.getExcludes()) {
-            if (exclude instanceof PathSecurityExclude) {
-                // Check original path first
-                if (exclude.isExcluded(path)) {
-                    return true;
-                }
-
-                // Check normalized path
-                if (exclude.isExcluded(normalizedPathString)) {
-                    return true;
-                }
-
-                // Check with forward slashes for cross-platform compatibility
-                String pathWithForwardSlashes = normalizedPathString.replace('\\', '/');
-                if (exclude.isExcluded(pathWithForwardSlashes)) {
-                    return true;
-                }
+            if (exclude.isExcluded(path) || exclude.isExcluded(normalizedStr)) {
+                return true;
             }
         }
 

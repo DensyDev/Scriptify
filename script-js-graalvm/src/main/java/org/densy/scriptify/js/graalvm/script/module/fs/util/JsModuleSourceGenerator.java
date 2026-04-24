@@ -1,6 +1,6 @@
 package org.densy.scriptify.js.graalvm.script.module.fs.util;
 
-import org.densy.scriptify.api.script.module.ScriptModule;
+import org.densy.scriptify.api.script.module.ScriptInternalModule;
 import org.densy.scriptify.api.script.module.export.ScriptExport;
 import org.densy.scriptify.api.script.module.export.ScriptValueExport;
 import org.densy.scriptify.api.script.module.export.resolver.ScriptModuleExportResolver;
@@ -15,7 +15,7 @@ public final class JsModuleSourceGenerator {
 
     public static String generateModuleSource(
             Context context,
-            ScriptModule module,
+            ScriptInternalModule module,
             ScriptModuleExportResolver resolver
     ) {
         StringBuilder builder = new StringBuilder();

@@ -1,7 +1,7 @@
 package org.densy.scriptify.core.script.module;
 
 import org.densy.scriptify.api.exception.ScriptModuleCopyException;
-import org.densy.scriptify.api.script.module.ScriptModule;
+import org.densy.scriptify.api.script.module.ScriptInternalModule;
 import org.densy.scriptify.api.script.module.export.ScriptExport;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public abstract class AbstractScriptModule implements ScriptModule {
+public abstract class AbstractScriptInternalModule implements ScriptInternalModule {
     private final Map<String, ScriptExport> exports = new LinkedHashMap<>();
 
     @Override
@@ -22,7 +22,7 @@ public abstract class AbstractScriptModule implements ScriptModule {
     }
 
     @Override
-    public void copy(ScriptModule module) {
+    public void copy(ScriptInternalModule module) {
         // We need to verify that the module from which we want to copy exports
         // does not contain any exports with the same name as in the current
         // module but with a different hash.

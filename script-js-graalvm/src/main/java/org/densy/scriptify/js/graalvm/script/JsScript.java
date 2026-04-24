@@ -100,7 +100,12 @@ public class JsScript implements Script<Value> {
                         )
                         .build())
                 .allowIO(IOAccess.newBuilder()
-                        .fileSystem(new VirtualModuleFileSystem(moduleManager, contextRef::get, resolverSupplier))
+                        .fileSystem(new VirtualModuleFileSystem(
+                                moduleManager,
+                                contextRef::get,
+                                resolverSupplier,
+                                securityManager.getPathAccessor()
+                        ))
                         .build());
 
         // If security mode is enabled, search all exclusions

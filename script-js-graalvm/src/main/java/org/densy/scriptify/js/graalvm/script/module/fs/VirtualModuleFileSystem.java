@@ -1,8 +1,9 @@
 package org.densy.scriptify.js.graalvm.script.module.fs;
 
-import org.densy.scriptify.api.script.module.ScriptModule;
-import org.densy.scriptify.api.script.module.ScriptModuleManager;
+import org.densy.scriptify.api.exception.ScriptModuleLoadException;
+import org.densy.scriptify.api.script.module.*;
 import org.densy.scriptify.api.script.module.export.resolver.ScriptModuleExportResolver;
+import org.densy.scriptify.api.script.security.SecurityPathAccessor;
 import org.densy.scriptify.js.graalvm.script.module.fs.util.ByteArrayChannel;
 import org.densy.scriptify.js.graalvm.script.module.fs.util.JsModuleSourceGenerator;
 import org.graalvm.polyglot.Context;
@@ -28,33 +29,50 @@ public class VirtualModuleFileSystem implements FileSystem {
     private final ScriptModuleManager moduleManager;
     private final Supplier<Context> contextSupplier;
     private final Supplier<ScriptModuleExportResolver> resolverSupplier;
+    private final SecurityPathAccessor securityAccessor;
 
     private final Map<String, Path> modulePathCache = new HashMap<>();
 
     public VirtualModuleFileSystem(
             ScriptModuleManager moduleManager,
             Supplier<Context> contextSupplier,
-            Supplier<ScriptModuleExportResolver> resolverSupplier
+            Supplier<ScriptModuleExportResolver> resolverSupplier,
+            SecurityPathAccessor securityAccessor
     ) {
         this.moduleManager = moduleManager;
         this.contextSupplier = contextSupplier;
         this.resolverSupplier = resolverSupplier;
+        this.securityAccessor = securityAccessor;
     }
 
     @Override
     public Path parsePath(String path) {
-        if (moduleManager.getModule(path) != null) {
-            return this.resolveVirtualPath(path);
+        // internal java-module
+        if (moduleManager.getModule(path) instanceof ScriptInternalModule) {
+            return resolveVirtualPath(path);
         }
-        return real.parsePath(path);
+
+        // external module
+        if (moduleManager.getModule(path) instanceof ScriptExternalModule external) {
+            return resolveExternalPath(path, external);
+        }
+
+        // real file - resolve via security accessor (relative to basePath if needed)
+        return securityAccessor.getAccessiblePath(path);
     }
 
     @Override
     public Path parsePath(URI uri) {
         if (SCHEME.equals(uri.getScheme())) {
-            return this.resolveVirtualPath(uri.getHost());
+            return resolveVirtualPath(uri.getHost());
         }
-        return real.parsePath(uri);
+
+        Path path = real.parsePath(uri);
+        if (!securityAccessor.isAccessible(path.toString())) {
+            throw new IllegalArgumentException("Access denied by security policy: " + uri);
+        }
+
+        return path;
     }
 
     @Override
@@ -62,6 +80,12 @@ public class VirtualModuleFileSystem implements FileSystem {
         if (this.isVirtual(path)) {
             return;
         }
+
+        // check the access to real path via security path accessor
+        if (!securityAccessor.isAccessible(path.toString())) {
+            throw new AccessDeniedException(path.toString(), null, "Access denied by security policy");
+        }
+
         real.checkAccess(path, modes, linkOptions);
     }
 
@@ -77,6 +101,12 @@ public class VirtualModuleFileSystem implements FileSystem {
             attrs.put("lastAccessTime", FileTime.fromMillis(0));
             return attrs;
         }
+
+        // check the access to real path via security path accessor
+        if (!securityAccessor.isAccessible(path.toString())) {
+            throw new AccessDeniedException(path.toString(), null, "Access denied by security policy");
+        }
+
         return real.readAttributes(path, attributes, options);
     }
 
@@ -84,42 +114,79 @@ public class VirtualModuleFileSystem implements FileSystem {
     public SeekableByteChannel newByteChannel(Path path, Set<? extends OpenOption> options, FileAttribute<?>... attrs) throws IOException {
         if (this.isVirtual(path)) {
             String moduleName = getModuleName(path);
-            ScriptModule module = moduleManager.getModule(moduleName);
-            if (module == null) {
-                throw new IOException("Scriptify module not found: " + moduleName);
+
+            if (moduleManager.getModule(moduleName) instanceof ScriptInternalModule internal) {
+                byte[] source = JsModuleSourceGenerator
+                        .generateModuleSource(
+                                contextSupplier.get(),
+                                internal,
+                                resolverSupplier.get()
+                        )
+                        .getBytes(StandardCharsets.UTF_8);
+                return new ByteArrayChannel(source);
             }
-            byte[] source = JsModuleSourceGenerator
-                    .generateModuleSource(contextSupplier.get(), module, resolverSupplier.get())
-                    .getBytes(StandardCharsets.UTF_8);
-            return new ByteArrayChannel(source);
+
+            if (moduleManager.getModule(moduleName) instanceof ScriptExternalModule external) {
+                try {
+                    return new ByteArrayChannel(external.load());
+                } catch (ScriptModuleLoadException e) {
+                    throw new IOException("Failed to load external module: " + moduleName, e);
+                }
+            }
+
+            throw new IOException("Script module not found: " + moduleName);
         }
         return real.newByteChannel(path, options, attrs);
     }
 
     @Override
     public Path toAbsolutePath(Path path) {
-        if (isVirtual(path)) return path;
+        if (isVirtual(path)) {
+            return path;
+        }
+
+        // resolve the path relative to basePath
+        if (!path.isAbsolute()) {
+            return securityAccessor.getBasePath().resolve(path).normalize();
+        }
+
         return real.toAbsolutePath(path);
     }
 
     @Override
     public Path toRealPath(Path path, LinkOption... linkOptions) throws IOException {
-        if (isVirtual(path)) return path;
+        if (isVirtual(path)) {
+            return path;
+        }
+
+        if (!securityAccessor.isAccessible(path.toString())) {
+            throw new AccessDeniedException(path.toString(), null, "Access denied by security policy");
+        }
+
         return real.toRealPath(path, linkOptions);
     }
 
     @Override
     public DirectoryStream<Path> newDirectoryStream(Path dir, DirectoryStream.Filter<? super Path> filter) throws IOException {
+        if (!securityAccessor.isAccessible(dir.toString())) {
+            throw new AccessDeniedException(dir.toString(), null, "Access denied by security policy");
+        }
         return real.newDirectoryStream(dir, filter);
     }
 
     @Override
     public void createDirectory(Path dir, FileAttribute<?>... attrs) throws IOException {
+        if (!securityAccessor.isAccessible(dir.toString())) {
+            throw new AccessDeniedException(dir.toString(), null, "Access denied by security policy");
+        }
         real.createDirectory(dir, attrs);
     }
 
     @Override
     public void delete(Path path) throws IOException {
+        if (!securityAccessor.isAccessible(path.toString())) {
+            throw new AccessDeniedException(path.toString(), null, "Access denied by security policy");
+        }
         real.delete(path);
     }
 
@@ -129,6 +196,19 @@ public class VirtualModuleFileSystem implements FileSystem {
                 "scriptify",
                 JsModuleSourceGenerator.encodeModuleName(name) + ".mjs"
         ));
+    }
+
+    private Path resolveExternalPath(String moduleName, ScriptExternalModule external) {
+        if (external instanceof ScriptFileExternalModule fileModule) {
+            Path target = Files.isDirectory(fileModule.getPath())
+                    ? fileModule.getPath().resolve(fileModule.getEntryPoint())
+                    : fileModule.getPath();
+            if (!securityAccessor.isAccessible(target.toString())) {
+                throw new IllegalArgumentException("Access denied by security policy: " + target);
+            }
+            return target;
+        }
+        return resolveVirtualPath(moduleName);
     }
 
     private boolean isVirtual(Path path) {

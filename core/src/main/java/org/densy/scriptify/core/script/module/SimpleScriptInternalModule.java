@@ -4,10 +4,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class SimpleScriptModule extends AbstractScriptModule {
+public class SimpleScriptInternalModule extends AbstractScriptInternalModule {
     private final String name;
 
-    public SimpleScriptModule(String name) {
+    public SimpleScriptInternalModule(String name) {
         this.name = Objects.requireNonNull(name, "Module name cannot be null");
     }
 

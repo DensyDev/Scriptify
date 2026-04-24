@@ -5,13 +5,9 @@ import org.densy.scriptify.api.script.Script;
 import org.densy.scriptify.api.script.module.ScriptModule;
 import org.densy.scriptify.api.script.module.ScriptModuleManager;
 import org.densy.scriptify.api.script.module.export.ScriptExport;
-import org.densy.scriptify.api.script.module.export.ScriptValueExport;
 import org.densy.scriptify.api.script.module.export.resolver.ScriptModuleExportResolver;
 import org.densy.scriptify.api.script.module.export.resolver.ScriptModuleExportResolverFactory;
-import org.densy.scriptify.core.script.module.ScriptGlobalModule;
-import org.densy.scriptify.core.script.module.export.ScriptConstantExport;
-import org.densy.scriptify.core.script.module.export.ScriptFunctionExport;
-import org.densy.scriptify.js.graalvm.script.JsFunction;
+import org.densy.scriptify.core.script.module.ScriptInternalGlobalModule;
 import org.densy.scriptify.js.graalvm.script.module.export.resolver.GraalModuleExportResolverFactory;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Value;
@@ -22,13 +18,11 @@ import java.util.Objects;
 
 public class GraalModuleManager implements ScriptModuleManager {
 
-    private final Script<?> script;
-    private final ScriptGlobalModule globalModule = new ScriptGlobalModule();
+    private final ScriptInternalGlobalModule globalModule = new ScriptInternalGlobalModule();
     private final Map<String, ScriptModule> modules = new LinkedHashMap<>();
     private ScriptModuleExportResolverFactory moduleExportResolverFactory;
 
     public GraalModuleManager(Script<?> script) {
-        this.script = script;
         this.setModuleExportResolver(new GraalModuleExportResolverFactory(script));
     }
 
@@ -43,7 +37,7 @@ public class GraalModuleManager implements ScriptModuleManager {
     }
 
     @Override
-    public ScriptGlobalModule getGlobalModule() {
+    public ScriptInternalGlobalModule getGlobalModule() {
         return globalModule;
     }
 
