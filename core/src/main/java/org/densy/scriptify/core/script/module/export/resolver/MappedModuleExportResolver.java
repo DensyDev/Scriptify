@@ -11,7 +11,7 @@ public abstract class MappedModuleExportResolver implements ScriptModuleExportRe
 
     private final Map<Class<?>, Function<ScriptExport, Object>> resolvers = new HashMap<>();
 
-    public <E extends ScriptExport> void map(Class<E> type, Function<E, Object> resolver) {
+    public <E extends ScriptExport> void mapping(Class<E> type, Function<E, Object> resolver) {
         resolvers.put(type, export -> resolver.apply(type.cast(export)));
     }
 

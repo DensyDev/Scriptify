@@ -16,6 +16,10 @@ import org.densy.scriptify.common.script.function.impl.zip.ScriptFunctionUnzipFi
 import org.densy.scriptify.common.script.function.impl.zip.ScriptFunctionZipFile;
 import org.densy.scriptify.core.script.function.StandardFunctionManager;
 
+/**
+ * @deprecated this class is marked as deprecated in version 1.6. Modules have replaced managers.
+ */
+@Deprecated(forRemoval = true)
 public class CommonFunctionManager extends StandardFunctionManager {
 
     public CommonFunctionManager() {

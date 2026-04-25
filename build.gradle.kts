@@ -12,7 +12,7 @@ java {
 
 allprojects {
     group = "org.densy.scriptify"
-    version = "1.5.0-SNAPSHOT"
+    version = "1.6.0-SNAPSHOT"
 }
 
 subprojects {

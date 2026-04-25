@@ -12,12 +12,12 @@ import org.graalvm.polyglot.Context;
 public final class GraalModuleExportResolver extends MappedModuleExportResolver {
 
     public GraalModuleExportResolver(Script<?> script, Context context) {
-        this.map(ScriptValueExport.class, export -> context.asValue(export.getValue()));
-        this.map(ScriptFunctionExport.class, export -> new JsFunction(script, script.getFunctionManager()
+        this.mapping(ScriptValueExport.class, export -> context.asValue(export.getValue()));
+        this.mapping(ScriptFunctionExport.class, export -> new JsFunction(script, script.getFunctionManager()
                 .getFunctionDefinitionFactory()
                 .create(export.getFunction())
         ));
-        this.map(ScriptFunctionDefinitionExport.class, export -> new JsFunction(script, export.getDefinition()));
-        this.map(ScriptConstantExport.class, export -> export.getConstant().getValue());
+        this.mapping(ScriptFunctionDefinitionExport.class, export -> new JsFunction(script, export.getDefinition()));
+        this.mapping(ScriptConstantExport.class, export -> export.getConstant().getValue());
     }
 }
