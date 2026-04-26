@@ -26,7 +26,7 @@ For adding a library only:
 <dependency>
     <groupId>org.densy.scriptify</groupId>
     <artifactId>core</artifactId>
-    <version>1.4.4-SNAPSHOT</version>
+    <version>1.6.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -35,12 +35,12 @@ For adding a library with JS for Rhino or GraalVM:
 <dependency>
     <groupId>org.densy.scriptify</groupId>
     <artifactId>script-js-rhino</artifactId>
-    <version>1.4.4-SNAPSHOT</version>
+    <version>1.6.0-SNAPSHOT</version>
 </dependency>
 <dependency>
     <groupId>org.densy.scriptify</groupId>
     <artifactId>script-js-graalvm</artifactId>
-    <version>1.4.4-SNAPSHOT</version>
+    <version>1.6.0-SNAPSHOT</version>
 </dependency>
 ```
 ## Gradle
@@ -54,11 +54,11 @@ maven {
 
 For adding a library only:
 ```groovy
-implementation "org.densy.scriptify:core:1.4.4-SNAPSHOT"
+implementation "org.densy.scriptify:core:1.6.0-SNAPSHOT"
 ```
 
 For adding a library with JS for Rhino or GraalVM:
 ```groovy
-implementation "org.densy.scriptify:script-js-rhino:1.4.4-SNAPSHOT"
-implementation "org.densy.scriptify:script-js-graalvm:1.4.4-SNAPSHOT"
+implementation "org.densy.scriptify:script-js-rhino:1.6.0-SNAPSHOT"
+implementation "org.densy.scriptify:script-js-graalvm:1.6.0-SNAPSHOT"
 ```
