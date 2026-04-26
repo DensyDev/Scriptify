@@ -9,6 +9,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
+/**
+ * A script module loaded from an external source using file.
+ */
 public class SimpleScriptFileExternalModule implements ScriptFileExternalModule {
 
     private final String name;

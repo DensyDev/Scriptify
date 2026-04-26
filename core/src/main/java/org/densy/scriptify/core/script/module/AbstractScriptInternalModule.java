@@ -10,6 +10,9 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * An abstract class for an internal module.
+ */
 public abstract class AbstractScriptInternalModule implements ScriptInternalModule {
     private final Map<String, ScriptExport> exports = new LinkedHashMap<>();
 

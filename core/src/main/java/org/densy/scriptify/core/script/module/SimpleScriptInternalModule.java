@@ -4,6 +4,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+/**
+ * A simple implementation of an external script module.
+ */
 public class SimpleScriptInternalModule extends AbstractScriptInternalModule {
     private final String name;
 

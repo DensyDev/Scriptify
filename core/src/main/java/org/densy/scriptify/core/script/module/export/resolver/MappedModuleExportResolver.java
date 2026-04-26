@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * A value resolver for export with simple mapping for each export.
+ */
 public abstract class MappedModuleExportResolver implements ScriptModuleExportResolver {
 
     private final Map<Class<?>, Function<ScriptExport, Object>> resolvers = new HashMap<>();

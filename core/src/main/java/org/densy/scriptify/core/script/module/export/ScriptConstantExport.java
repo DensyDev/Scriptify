@@ -4,6 +4,9 @@ import lombok.Getter;
 import org.densy.scriptify.api.script.constant.ScriptConstant;
 import org.densy.scriptify.api.script.module.export.ScriptExport;
 
+/**
+ * A script module export for a constant.
+ */
 @Getter
 public final class ScriptConstantExport implements ScriptExport {
 
