@@ -9,14 +9,14 @@ import java.util.Map;
 
 public class HttpRequest {
     private final String url;
-    private final String method;
+    private final HttpMethod method;
     private final Map<String, String> headers = new HashMap<>();
     private String body = "";
     private String mediaType = "";
 
-    public HttpRequest(String url, String method) {
+    public HttpRequest(String url, HttpMethod method) {
         this.url = url;
-        this.method = method.toUpperCase();
+        this.method = method;
     }
 
     public void setBody(String body, String mediaType) {
@@ -29,6 +29,10 @@ public class HttpRequest {
     }
 
     public Object send(String outputType) {
+        return this.send(OutputType.valueOf(outputType));
+    }
+
+    public Object send(OutputType outputType) {
         Request.Builder requestBuilder = new Request.Builder()
                 .url(url);
 
@@ -36,16 +40,15 @@ public class HttpRequest {
             requestBuilder.addHeader(header.getKey(), header.getValue());
         }
 
-        if (method.equals("POST") || method.equals("PUT")) {
-
+        if (method.equals(HttpMethod.POST) || method.equals(HttpMethod.PUT)) {
             if (body != null && !body.isEmpty()) {
                 RequestBody requestBody = RequestBody.create(body, MediaType.get(mediaType));
-                requestBuilder.method(method, requestBody);
+                requestBuilder.method(method.name(), requestBody);
             } else {
-                requestBuilder.method(method, RequestBody.create(new byte[0], null));
+                requestBuilder.method(method.name(), RequestBody.create(new byte[0], null));
             }
         } else {
-            requestBuilder.method(method, null);
+            requestBuilder.method(method.name(), null);
         }
 
         OkHttpClient client = new OkHttpClient();
@@ -53,11 +56,10 @@ public class HttpRequest {
         try (Response response = client.newCall(requestBuilder.build()).execute()) {
             ResponseBody responseBody = response.body();
             if (responseBody != null) {
-                return ScriptObject.of(switch(outputType.toUpperCase()) {
-                    case "STRING" -> responseBody.string();
-                    case "BYTES" -> responseBody.bytes();
-                    default -> throw new IllegalArgumentException("Unsupported output type: " + outputType);
-                });
+                return switch(outputType) {
+                    case STRING -> responseBody.string();
+                    case BYTES -> responseBody.bytes();
+                };
             }
             return null;
         } catch (IOException e) {

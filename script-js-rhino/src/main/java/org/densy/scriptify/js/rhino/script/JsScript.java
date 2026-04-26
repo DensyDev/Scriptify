@@ -33,8 +33,7 @@ public class JsScript implements Script<Object> {
 
     @Override
     public ScriptModuleManager getModuleManager() {
-        // TODO: implement
-        return null;
+        throw new UnsupportedOperationException("Rhino does not support a module system.");
     }
 
     @Override
