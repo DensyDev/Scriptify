@@ -10,6 +10,7 @@ import org.densy.scriptify.api.script.constant.ScriptConstantManager;
 import org.densy.scriptify.api.script.function.ScriptFunctionManager;
 import org.densy.scriptify.api.script.function.definition.ScriptFunctionDefinition;
 import org.densy.scriptify.api.script.module.ScriptModuleManager;
+import org.densy.scriptify.api.script.module.export.access.ScriptAccess;
 import org.densy.scriptify.api.script.module.export.resolver.ScriptModuleExportResolver;
 import org.densy.scriptify.api.script.security.ScriptSecurityManager;
 import org.densy.scriptify.core.script.constant.StandardConstantManager;
@@ -89,7 +90,10 @@ public class JsScript implements Script<Value> {
         };
 
         Context.Builder builder = Context.newBuilder("js")
-                .allowHostAccess(HostAccess.newBuilder(HostAccess.ALL)
+                .allowHostAccess(HostAccess.newBuilder(switch (moduleManager.getScriptAccess()) {
+                            case ALL -> HostAccess.ALL;
+                            case EXPLICIT -> HostAccess.EXPLICIT;
+                        })
                         // Mapping for the ScriptObject class required
                         // to convert a ScriptObject to the value it contains
                         .targetTypeMapping(
@@ -98,6 +102,8 @@ public class JsScript implements Script<Value> {
                                 object -> true,
                                 ScriptObject::getValue
                         )
+                        .allowAccessAnnotatedBy(ScriptAccess.Export.class)
+                        .allowImplementationsAnnotatedBy(ScriptAccess.Export.class)
                         .build())
                 .allowIO(IOAccess.newBuilder()
                         .fileSystem(new VirtualModuleFileSystem(
