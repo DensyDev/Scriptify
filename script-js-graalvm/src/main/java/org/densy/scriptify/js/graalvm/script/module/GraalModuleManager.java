@@ -5,6 +5,7 @@ import org.densy.scriptify.api.script.Script;
 import org.densy.scriptify.api.script.module.ScriptModule;
 import org.densy.scriptify.api.script.module.ScriptModuleManager;
 import org.densy.scriptify.api.script.module.export.ScriptExport;
+import org.densy.scriptify.api.script.module.export.access.ScriptAccess;
 import org.densy.scriptify.api.script.module.export.resolver.ScriptModuleExportResolver;
 import org.densy.scriptify.api.script.module.export.resolver.ScriptModuleExportResolverFactory;
 import org.densy.scriptify.core.script.module.ScriptInternalGlobalModule;
@@ -21,6 +22,7 @@ public class GraalModuleManager implements ScriptModuleManager {
     private final ScriptInternalGlobalModule globalModule = new ScriptInternalGlobalModule();
     private final Map<String, ScriptModule> modules = new LinkedHashMap<>();
     private ScriptModuleExportResolverFactory moduleExportResolverFactory;
+    private ScriptAccess scriptAccess = ScriptAccess.ALL;
 
     public GraalModuleManager(Script<?> script) {
         this.setModuleExportResolver(new GraalModuleExportResolverFactory(script));
@@ -34,6 +36,16 @@ public class GraalModuleManager implements ScriptModuleManager {
     @Override
     public void setModuleExportResolver(ScriptModuleExportResolverFactory moduleExportResolverFactory) {
         this.moduleExportResolverFactory = Objects.requireNonNull(moduleExportResolverFactory, "moduleExportResolverFactory cannot be null");
+    }
+
+    @Override
+    public ScriptAccess getScriptAccess() {
+        return scriptAccess;
+    }
+
+    @Override
+    public void setScriptAccess(ScriptAccess scriptAccess) {
+        this.scriptAccess = Objects.requireNonNull(scriptAccess, "scriptAccess cannot be null");;
     }
 
     @Override

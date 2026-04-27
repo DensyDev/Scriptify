@@ -1,5 +1,6 @@
 package org.densy.scriptify.api.script.module;
 
+import org.densy.scriptify.api.script.module.export.access.ScriptAccess;
 import org.densy.scriptify.api.script.module.export.resolver.ScriptModuleExportResolverFactory;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
@@ -24,6 +25,20 @@ public interface ScriptModuleManager {
      * @param factory ScriptModuleExportResolverFactory to set
      */
     void setModuleExportResolver(ScriptModuleExportResolverFactory factory);
+
+    /**
+     * Gets the script's access to the module and its exported properties.
+     *
+     * @return ScriptAccess enum
+     */
+    ScriptAccess getScriptAccess();
+
+    /**
+     * Sets the script's access to the module and its exported properties.
+     *
+     * @param scriptAccess ScriptAccess to set
+     */
+    void setScriptAccess(ScriptAccess scriptAccess);
 
     /**
      * Gets the internal global module. Exports added here are available globally without import.

@@ -1,7 +1,7 @@
 package org.densy.scriptify.http.script.function.data;
 
-import org.densy.scriptify.api.script.ScriptObject;
 import okhttp3.*;
+import org.densy.scriptify.api.script.module.export.access.ScriptAccess;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -14,24 +14,29 @@ public class HttpRequest {
     private String body = "";
     private String mediaType = "";
 
+    @ScriptAccess.Export
     public HttpRequest(String url, HttpMethod method) {
         this.url = url;
         this.method = method;
     }
 
+    @ScriptAccess.Export
     public void setBody(String body, String mediaType) {
         this.body = body;
         this.mediaType = mediaType;
     }
 
+    @ScriptAccess.Export
     public void addHeader(String key, String value) {
         headers.put(key, value);
     }
 
+    @ScriptAccess.Export
     public Object send(String outputType) {
         return this.send(OutputType.valueOf(outputType));
     }
 
+    @ScriptAccess.Export
     public Object send(OutputType outputType) {
         Request.Builder requestBuilder = new Request.Builder()
                 .url(url);
