@@ -11,7 +11,11 @@ import org.densy.scriptify.api.script.module.ScriptModuleManager;
 import org.densy.scriptify.api.script.security.ScriptSecurityManager;
 import org.densy.scriptify.core.script.constant.StandardConstantManager;
 import org.densy.scriptify.core.script.function.StandardFunctionManager;
+import org.densy.scriptify.core.script.module.export.ScriptConstantExport;
+import org.densy.scriptify.core.script.module.export.ScriptFunctionDefinitionExport;
 import org.densy.scriptify.core.script.security.StandardSecurityManager;
+import org.densy.scriptify.js.rhino.script.module.RhinoModuleManager;
+import org.densy.scriptify.js.rhino.script.module.RhinoModuleSourceTransformer;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ScriptableObject;
 
@@ -22,6 +26,7 @@ import java.util.Objects;
 public class JsScript implements Script<Object> {
 
     private final ScriptSecurityManager securityManager = new StandardSecurityManager();
+    private final RhinoModuleManager moduleManager = new RhinoModuleManager(this);
     private ScriptFunctionManager functionManager = new StandardFunctionManager();
     private ScriptConstantManager constantManager = new StandardConstantManager();
     private final List<String> extraScript = new ArrayList<>();
@@ -33,7 +38,7 @@ public class JsScript implements Script<Object> {
 
     @Override
     public ScriptModuleManager getModuleManager() {
-        throw new UnsupportedOperationException("Rhino does not support a module system.");
+        return moduleManager;
     }
 
     @Override
@@ -65,6 +70,7 @@ public class JsScript implements Script<Object> {
     public CompiledScript<Object> compile(String script) throws ScriptException {
         try {
             Context context = Context.enter();
+            context.setLanguageVersion(Context.VERSION_ES6);
             context.setWrapFactory(new JsWrapFactory());
 
             ScriptableObject scope = context.initStandardObjects();
@@ -76,12 +82,13 @@ public class JsScript implements Script<Object> {
             }
 
             for (ScriptFunctionDefinition definition : functionManager.getFunctions().values()) {
-                scope.put(definition.getFunction().getName(), scope, new JsFunction(this, definition));
+                moduleManager.getGlobalModule().export(new ScriptFunctionDefinitionExport(definition));
             }
 
             for (ScriptConstant constant : constantManager.getConstants().values()) {
-                ScriptableObject.putConstProperty(scope, constant.getName(), constant.getValue());
+                moduleManager.getGlobalModule().export(new ScriptConstantExport(constant));
             }
+            moduleManager.applyTo(context, scope);
 
             // Building full script including extra script code
             StringBuilder fullScript = new StringBuilder();
@@ -90,7 +97,12 @@ public class JsScript implements Script<Object> {
             }
             fullScript.append(script);
 
-            var compiled = context.compileString(fullScript.toString(), "script", 1, null);
+            var compiled = context.compileString(
+                    RhinoModuleSourceTransformer.transformScript(fullScript.toString()),
+                    "script",
+                    1,
+                    null
+            );
             return new JsCompiledScript(context, scope, compiled);
         } catch (Exception e) {
             throw new ScriptException(e);
