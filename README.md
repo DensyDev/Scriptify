@@ -5,6 +5,27 @@ Scriptify is a library to evaluate scripts written in JavaScript with ability to
 This library is designed to execute JavaScript scripts and has the ability to register global functions and constants.
 It also allows you to configure security for executing scripts.
 
+## Quick Start
+
+```java
+import org.densy.scriptify.api.exception.ScriptException;
+import org.densy.scriptify.js.graalvm.script.JsScript;
+
+public class Main {
+    public static void main(String[] args) throws ScriptException {
+        JsScript script = new JsScript();
+        Object result = script.evalOneShot("1 + 2 + 3");
+        System.out.println(result);
+    }
+}
+```
+
+For Rhino use `org.densy.scriptify.js.rhino.script.JsScript` instead.
+
+## Documentation
+
+Full documentation is available in [docs/index.md](docs/index.md).
+
 ## Other scripts support
 - [TypeScript](https://github.com/DensyDev/Scriptify-TypeScript) - TS support using swc4j
 - [TypeScript Declaration Generator](https://github.com/DensyDev/Scriptify-DTS-Generator) - Declaration generator for JS or TS
