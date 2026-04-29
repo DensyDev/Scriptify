@@ -1,4 +1,4 @@
-ммм# Scriptify
+# Scriptify
 Scriptify is a JVM library for embedding JavaScript execution into Java applications. It provides script runtimes, Java function exports, constants, modules, host-access control, and security-aware file access.
 
 ## What is it for?
