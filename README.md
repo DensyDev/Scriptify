@@ -1,5 +1,5 @@
-# Scriptify
-Scriptify is a library to evaluate scripts written in JavaScript with ability to add global functions and variables.
+ммм# Scriptify
+Scriptify is a JVM library for embedding JavaScript execution into Java applications. It provides script runtimes, Java function exports, constants, modules, host-access control, and security-aware file access.
 
 ## What is it for?
 This library is designed to execute JavaScript scripts and has the ability to register global functions and constants.
