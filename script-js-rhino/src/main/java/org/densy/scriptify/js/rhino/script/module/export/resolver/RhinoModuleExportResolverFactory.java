@@ -19,6 +19,6 @@ public final class RhinoModuleExportResolverFactory implements ScriptModuleExpor
         if (!(context instanceof RhinoModuleContext rhinoContext)) {
             throw new ScriptModuleWrongContextException(RhinoModuleContext.class, context.getClass());
         }
-        return new RhinoModuleExportResolver(script, rhinoContext.scope());
+        return new RhinoModuleExportResolver(script, rhinoContext.context(), rhinoContext.scope());
     }
 }

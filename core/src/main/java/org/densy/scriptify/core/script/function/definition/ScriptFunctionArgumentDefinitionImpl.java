@@ -1,9 +1,9 @@
 package org.densy.scriptify.core.script.function.definition;
 
-import org.densy.scriptify.api.script.function.definition.ScriptFunctionArgumentDefinition;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
+import org.densy.scriptify.api.script.function.definition.ScriptFunctionArgumentDefinition;
 
 @Getter
 @AllArgsConstructor

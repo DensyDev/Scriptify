@@ -8,23 +8,27 @@ import org.densy.scriptify.core.script.module.export.ScriptFunctionExport;
 import org.densy.scriptify.core.script.module.export.resolver.MappedModuleExportResolver;
 import org.densy.scriptify.js.rhino.script.JsFunction;
 import org.mozilla.javascript.Context;
-import org.mozilla.javascript.NativeJavaClass;
 import org.mozilla.javascript.ScriptableObject;
 
 public final class RhinoModuleExportResolver extends MappedModuleExportResolver {
 
-    public RhinoModuleExportResolver(Script<?> script, ScriptableObject scope) {
+    public RhinoModuleExportResolver(Script<?> script, Context context, ScriptableObject scope) {
         this.mapping(ScriptValueExport.class, export -> {
             if (export.isClass()) {
-                return new NativeJavaClass(scope, (Class<?>) export.getValue());
+                return context.getWrapFactory().wrapJavaClass(context, scope, (Class<?>) export.getValue());
             }
-            return Context.javaToJS(export.getValue(), scope);
+            return context.getWrapFactory().wrap(context, scope, export.getValue(), Object.class);
         });
         this.mapping(ScriptFunctionExport.class, export -> new JsFunction(script, script.getFunctionManager()
                 .getFunctionDefinitionFactory()
                 .create(export.getFunction())
         ));
         this.mapping(ScriptFunctionDefinitionExport.class, export -> new JsFunction(script, export.getDefinition()));
-        this.mapping(ScriptConstantExport.class, export -> Context.javaToJS(export.getConstant().getValue(), scope));
+        this.mapping(ScriptConstantExport.class, export -> context.getWrapFactory().wrap(
+                context,
+                scope,
+                export.getConstant().getValue(),
+                Object.class
+        ));
     }
 }

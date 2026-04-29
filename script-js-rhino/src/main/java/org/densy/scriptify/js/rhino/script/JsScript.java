@@ -71,7 +71,7 @@ public class JsScript implements Script<Object> {
         try {
             Context context = Context.enter();
             context.setLanguageVersion(Context.VERSION_ES6);
-            context.setWrapFactory(new JsWrapFactory());
+            context.setWrapFactory(new JsWrapFactory(moduleManager.getScriptAccess()));
 
             ScriptableObject scope = context.initStandardObjects();
 
